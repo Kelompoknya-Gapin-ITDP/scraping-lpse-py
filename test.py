@@ -24,7 +24,7 @@
 from pyproc import Lpse
 
 # Inisialisasi LPSE
-lpse = Lpse('https://lpse.jabarprov.go.id')
+lpse = Lpse('https://lpse.jabarprov.go.id/eproc4/lelang')
 
 # Mendapatkan daftar paket lelang
 daftar_lelang = lpse.get_paket_tender(start=0, length=2)
