@@ -1,8 +1,9 @@
 from pyproc import Lpse
+import json
 
 lpse = Lpse('https://lpse.jabarprov.go.id')
 
-daftar_lelang = lpse.get_paket_tender(start=0, length=2)
+daftar_lelang = lpse.get_paket_tender(start=0, length=50)
 outputs = []
 
 for lelang in daftar_lelang['data']:
@@ -15,10 +16,9 @@ for lelang in daftar_lelang['data']:
     pemenang = detil.get_pemenang()
     jadwal = detil.get_jadwal()
 
-    if pemenang is None and jadwal is None:
+    if pemenang is None or jadwal is None or pemenang[0] is None:
         continue
 
-    print(jadwal)
     info_tender = {
         "id" : lelang[0],
         "nama" : lelang[1],
@@ -38,4 +38,5 @@ for lelang in daftar_lelang['data']:
     }
     outputs.append(info_tender)
 
-print(outputs)
+with open('result.json', 'w') as f:
+    json.dump(outputs, f)
