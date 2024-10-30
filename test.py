@@ -1,46 +1,42 @@
-# from pyproc import Lpse
-
-# lpse = Lpse('https://lpse.jabarprov.go.id')
-
-# # # mendapatkan daftar paket lelang
-# # daftar_lelang = lpse.get_paket_tender(start=0, length=2)
-# # print(daftar_lelang)
-
-# # pencarian paket non tender (penunjukkan langsung)
-# # daftar_pl = lpse.get_paket_non_tender(start=0, length=30)
-
-# # mendapatkan semua detil paket lelang
-# detil = lpse.detil_paket_tender(id_paket='79768414014')
-# # detil.get_all_detil()
-# # print(detil)
-
-# # mendapatkan hanya pemenang lelang
-# pemenang = detil.get_pemenang()
-# print(pemenang)
-
-
-#################################################
-
 from pyproc import Lpse
+import json
 
-# Inisialisasi LPSE
-lpse = Lpse('https://lpse.jabarprov.go.id/eproc4/lelang')
+lpse = Lpse('https://lpse.jabarprov.go.id')
 
-# Mendapatkan daftar paket lelang
-daftar_lelang = lpse.get_paket_tender(start=0, length=2)
+daftar_lelang = lpse.get_paket_tender(start=0, length=50)
+outputs = []
 
-# Iterasi setiap data lelang
 for lelang in daftar_lelang['data']:
-    # Mendapatkan ID tender dari kolom pertama
+    # info tender
     id_tender = lelang[0]
-    
-    # Mengambil detail pemenang menggunakan ID tender
+
     detil = lpse.detil_paket_tender(id_paket=id_tender)
     detil.get_all_detil()
+    pengumuman = detil.get_pengumuman()
     pemenang = detil.get_pemenang()
-    
-    # Menambahkan kolom 'pemenang' ke dalam data lelang
-    lelang.append(pemenang)  # atau lelang[-1].append(pemenang) untuk penempatan tertentu
+    jadwal = detil.get_jadwal()
 
-# Cetak hasil yang telah ditambahkan detail pemenang
-print(daftar_lelang)
+    if pemenang is None or jadwal is None or pemenang[0] is None:
+        continue
+
+    info_tender = {
+        "id" : lelang[0],
+        "nama" : lelang[1],
+        "lokasi_instansi": lelang[2],
+        "status_tender": lelang[3],
+        "nilai_tender": lelang[10],
+        "tanggal_pembuatan_tender": pengumuman["tanggal_pembuatan"],
+        "lokasi_pekerjaan": pengumuman["lokasi_pekerjaan"][0],
+        "satuan_kerja": pengumuman["satuan_kerja"],
+        "nama_pemenang": pemenang[0]["nama_pemenang"],
+        "alamat_pemenang": pemenang[0]["alamat"],
+        "npwp_pemenang": pemenang[0]["npwp"],
+        "harga_penawaran_pemenang": pemenang[0]["harga_penawaran"],
+        "harga_terkoreksi_pemenang": pemenang[0]["harga_terkoreksi"],
+        "harga_negosiasi_pemenang": pemenang[0]["harga_negosiasi"],
+        "tanggal_selesai": jadwal[-1]["sampai"]
+    }
+    outputs.append(info_tender)
+
+with open('result.json', 'w') as f:
+    json.dump(outputs, f)
