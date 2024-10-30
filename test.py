@@ -18,7 +18,6 @@
 # pemenang = detil.get_pemenang()
 # print(pemenang)
 
-
 #################################################
 
 from pyproc import Lpse
